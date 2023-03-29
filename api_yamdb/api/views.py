@@ -67,6 +67,7 @@ def get_signup(request):
         serializer.save()
         user = get_object_or_404(User, username=request.data.get('username'))
         user.confirmation_code = random.randint(10000, 99999)
+        user.save()
         send_mail(
             'Код подтверждения',
             f'Код подтверждения: {user.confirmation_code}',
