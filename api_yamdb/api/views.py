@@ -83,9 +83,9 @@ def get_signup(request):
 def get_token(request):
     serializer = TokenSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
         user = get_object_or_404(User, username=request.data.get('username'))
-        if user.DoesNotExist:
+        if not User.objects.filter(
+       username=request.data.get('username')).exists():
             return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
         if user.confirmation_code == request.data.get('confirmation_code'):
             refresh = RefreshToken.for_user(user)
