@@ -57,18 +57,6 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
-    @property
-    def is_user(self):
-        return self.role == 'user'
-
-    @property
-    def is_moderator(self):
-        return self.role == 'moderator'
-
-    @property
-    def is_admin(self):
-        return self.role == 'admin'
-
 
 class Category(models.Model):
     name = models.CharField(max_length=256)
