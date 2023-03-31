@@ -3,37 +3,62 @@ from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from rest_framework.response import Response
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, generics
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework import permissions, filters
 from rest_framework.pagination import LimitOffsetPagination
 
-from .permissions import IsAdmin
+from .permissions import IsAdmin, IsAdminOrReadOnly
 from reviews.models import Title, Genre, Category, User, Review
 from .serializers import TitleSerializer, GenreSerializer, CategorySerializer
 from .serializers import SignupSerializer, TokenSerializer, UserSerializer
 from .serializers import CommentSerializer, ReviewSerializer
 
-class GenreViewSet(viewsets.ReadOnlyModelViewSet):
+
+class GenreList(generics.ListCreateAPIView):
+    
     queryset = Genre.objects.all()
+    lookup_fields = ['slug']
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    pagination_class = LimitOffsetPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+
+class GenreDetail(generics.DestroyAPIView):
+    
+    queryset = Genre.objects.all()
+    lookup_fields = ['slug']
     serializer_class = GenreSerializer
     pagination_class = LimitOffsetPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
+    permission_classes = (IsAdminOrReadOnly,)
 
 
-class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+class CategoryList(generics.ListCreateAPIView):
+    
     queryset = Category.objects.all()
+    lookup_fields = ['slug']
     serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
 
-class TitleViewSet(viewsets.ReadOnlyModelViewSet):
+class CategoryDetail(generics.DestroyAPIView):
+    queryset = Category.objects.all()
+    lookup_fields = ['slug']
+    serializer_class = CategorySerializer
+    pagination_class = LimitOffsetPagination
+    permission_classes = (IsAdminOrReadOnly,)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', 'year', 'genre__slug', 'category__slug')
