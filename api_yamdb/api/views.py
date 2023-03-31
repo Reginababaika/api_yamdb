@@ -19,7 +19,7 @@ from .serializers import CommentSerializer, ReviewSerializer
 class GenreList(generics.ListCreateAPIView):
     
     queryset = Genre.objects.all()
-    lookup_fields = ['slug']
+    lookup_field = 'slug'
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
@@ -30,7 +30,7 @@ class GenreList(generics.ListCreateAPIView):
 class GenreDetail(generics.DestroyAPIView):
     
     queryset = Genre.objects.all()
-    lookup_fields = ['slug']
+    lookup_field = 'slug'
     serializer_class = GenreSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAdminOrReadOnly,)
@@ -39,7 +39,7 @@ class GenreDetail(generics.DestroyAPIView):
 class CategoryList(generics.ListCreateAPIView):
     
     queryset = Category.objects.all()
-    lookup_fields = ['slug']
+    lookup_field = 'slug'
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
@@ -49,7 +49,7 @@ class CategoryList(generics.ListCreateAPIView):
 
 class CategoryDetail(generics.DestroyAPIView):
     queryset = Category.objects.all()
-    lookup_fields = ['slug']
+    lookup_field = 'slug'
     serializer_class = CategorySerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAdminOrReadOnly,)
