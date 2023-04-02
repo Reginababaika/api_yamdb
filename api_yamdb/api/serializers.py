@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from reviews.models import Title, Genre, Category, User, Comment, Review
-from django.db.models import Avg
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -33,9 +33,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 class GenreSerializer(serializers.ModelSerializer):
 
-    class Meta:
+     class Meta:
         fields = ("name", "slug")
         model = Genre
+
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -51,38 +52,52 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = SlugRelatedField(queryset=Genre.objects.all(),
                              slug_field='slug',
                              many=True)
-    rating = serializers.SerializerMethodField()
+    
     class Meta:
-        fields = ("name", "year", "genre", "category", "description", "rating", "id")
+        fields = '__all__'
         model = Title
         
 
-    def get_rating(self, obj):
-        Review.objects.filter(title=obj).aggregate(Avg('score'))
+class ReadOnlyTitleSerializer(serializers.ModelSerializer):
+    rating = serializers.IntegerField(
+        source='reviews__score__avg', read_only=True
+    )
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
+
+    class Meta:
+        model = Title
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField(
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        default=serializers.CurrentUserDefault(),
         read_only=True
+    )
+    score = serializers.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(10)]
     )
 
     class Meta:
+        fields = '__all__'
         model = Review
-        fields = (
-            'id', 'text', 'author', 'score', 'pub_date')
+        read_only_fields = ['title']
 
     def validate(self, data):
-        """Запрещает пользователям оставлять повторные отзывы."""
-        if not self.context.get('request').method == 'POST':
-            return data
-        author = self.context.get('request').user
-        title_id = self.context.get('view').kwargs.get('title_id')
-        if Review.objects.filter(author=author, title=title_id).exists():
-            raise serializers.ValidationError(
-                'Вы уже оставляли отзыв на это произведение'
+        if self.context['request'].method == 'POST':
+            title_id = (
+                self.context['request'].parser_context['kwargs']['title_id']
             )
+            user = self.context['request'].user
+            if user.reviews.filter(title_id=title_id).exists():
+                raise serializers.ValidationError(
+                    'Нельзя оставить отзыв на одно произведение дважды'
+                )
         return data
-
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
