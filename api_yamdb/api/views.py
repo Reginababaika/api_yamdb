@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework import permissions, filters
 from rest_framework.pagination import LimitOffsetPagination
 
-from .permissions import IsAdmin, IsAdminOrReadOnly, IsUserOrReadOnly
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsUserOrReadOnly, IsOwnerOrReadOnly
 from reviews.models import Title, Genre, Category, User, Review
 from .serializers import TitleSerializer, GenreSerializer, CategorySerializer
 from .serializers import SignupSerializer, TokenSerializer, UserSerializer
@@ -142,7 +142,7 @@ def get_token(request):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsUserOrReadOnly,)
+    permission_classes = (IsUserOrReadOnly, IsOwnerOrReadOnly)
 
     def get_queryset(self):
         review = get_object_or_404(
@@ -159,7 +159,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsUserOrReadOnly,)
+    permission_classes = (IsUserOrReadOnly, IsOwnerOrReadOnly)
 
     def get_queryset(self):
         title = get_object_or_404(
