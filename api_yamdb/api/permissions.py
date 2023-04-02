@@ -11,6 +11,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
             request.user.is_superuser
         )
 
+
 class IsAdmin(permissions.BasePermission):
 
     def has_permission(self, request, view):
@@ -20,6 +21,7 @@ class IsAdmin(permissions.BasePermission):
             request.user.is_superuser
         )
 
+
 class IsUserOrReadOnly(permissions.BasePermission):
 
     def has_permission(self, request, view):
@@ -27,6 +29,7 @@ class IsUserOrReadOnly(permissions.BasePermission):
             request.method in permissions.SAFE_METHODS or
             request.user.is_authenticated
         )
+
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
 

@@ -61,7 +61,7 @@ class User(AbstractUser):
 class Category(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True, max_length=50)
-    
+
     def __str__(self):
         return self.name
 
@@ -69,7 +69,7 @@ class Category(models.Model):
 class Genre(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True, max_length=50)
-    
+
     def __str__(self):
         return self.name
 
@@ -77,7 +77,7 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
-    rating = models.IntegerField(default = 0)
+    rating = models.IntegerField(default=0)
     description = models.TextField()
     genre = models.ManyToManyField(
         Genre,
@@ -89,7 +89,7 @@ class Title(models.Model):
         null=True,
         related_name='titles'
     )
-    
+
     def __str__(self):
         return self.name
 
@@ -100,7 +100,7 @@ class TitleGenre(models.Model):
 
     def __str__(self):
         return f'{self.title} {self.genre}'
-    
+
 
 class Review(models.Model):
     title = models.ForeignKey(
@@ -156,5 +156,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.author
-
-
