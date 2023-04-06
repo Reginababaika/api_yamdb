@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'django_filters',
     'reviews.apps.ReviewsConfig',
     'api.apps.ApiConfig',
+    'users.apps.UsersConfig',
 
 ]
 
@@ -128,6 +129,8 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
-AUTH_USER_MODEL = 'reviews.User'
+AUTH_USER_MODEL = 'users.User'
+
+DEFAULT_FROM_EMAIL = 'from@admin.com'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

@@ -1,18 +1,35 @@
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
-from reviews.models import Title, Genre, Category, User, Comment, Review
+from reviews.models import Title, Genre, Category, Comment, Review
+from users.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import RegexValidator
 
 
 class SignupSerializer(serializers.ModelSerializer):
-
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+$',
+        max_length=150,
+        required=True
+    )
+    email = serializers.EmailField(
+        max_length=254,
+        required=True
+    )
     class Meta:
         model = User
         fields = ('username', 'email')
 
     def validate_username(self, data):
-        if data == "me":
+
+        if self.initial_data['username'] == "me":
             raise serializers.ValidationError('Недопустимое имя пользователя')
+        if User.objects.filter(username=self.initial_data['username']):
+            raise serializers.ValidationError(
+                'Пользователь с таким именем уже существует')
+        if User.objects.filter(email=self.initial_data['email']):
+            raise serializers.ValidationError(
+                'Пользователь с такой электронной почтой уже существует')
         return data
 
 
@@ -36,14 +53,14 @@ class UserSerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ("name", "slug")
+        exclude = ('id',) 
         model = Genre
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ("name", "slug")
+        exclude = ('id',) 
         model = Category
 
 
@@ -79,9 +96,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
         read_only=True
     )
-    score = serializers.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(10)]
-    )
 
     class Meta:
         fields = '__all__'
@@ -89,16 +103,17 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ['title']
 
     def validate(self, data):
-        if self.context['request'].method == 'POST':
-            title_id = (
-                self.context['request'].parser_context['kwargs']['title_id']
+        if self.context['request'].method != 'POST':
+            return data
+        user = self.context['request'].user
+        title_id = (
+            self.context['request'].parser_context['kwargs']['title_id']
+        )
+        if Review.objects.filter(author=user, title__id=title_id).exists():
+            raise serializers.ValidationError(
+                'Вы уже оставили отзыв на данное произведение'
             )
-            user = self.context['request'].user
-            if user.reviews.filter(title_id=title_id).exists():
-                raise serializers.ValidationError(
-                    'Нельзя оставить отзыв на одно произведение дважды'
-                )
-        return data
+        return data 
 
 
 class CommentSerializer(serializers.ModelSerializer):
