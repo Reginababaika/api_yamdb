@@ -2,8 +2,6 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from reviews.models import Title, Genre, Category, Comment, Review
 from users.models import User
-from django.core.validators import MaxValueValidator, MinValueValidator
-from django.core.validators import RegexValidator
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -16,6 +14,7 @@ class SignupSerializer(serializers.ModelSerializer):
         max_length=254,
         required=True
     )
+
     class Meta:
         model = User
         fields = ('username', 'email')
@@ -53,14 +52,14 @@ class UserSerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        exclude = ('id',) 
+        exclude = ('id',)
         model = Genre
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        exclude = ('id',) 
+        exclude = ('id',)
         model = Category
 
 
@@ -113,7 +112,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Вы уже оставили отзыв на данное произведение'
             )
-        return data 
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):

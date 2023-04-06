@@ -1,13 +1,13 @@
 from django.conf import settings
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.core.validators import RegexValidator
 from datetime import date
+from django.core.exceptions import ValidationError
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=256,
-        verbose_name='Название категории',)
+    name = models.CharField(
+        max_length=256, verbose_name='Название категории',)
     slug = models.SlugField(unique=True, max_length=50)
 
     def __str__(self):
@@ -15,8 +15,8 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=256,
-        verbose_name='Название жанра',)
+    name = models.CharField(
+        max_length=256, verbose_name='Название жанра',)
     slug = models.SlugField(unique=True, max_length=50)
 
     def __str__(self):
@@ -29,15 +29,15 @@ def validate_year(value):
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=256,
-        verbose_name='Название',)
+    name = models.CharField(
+        max_length=256, verbose_name='Название',)
     year = models.SmallIntegerField(
         verbose_name='Год',
         validators=[validate_year],
         db_index=True,
     )
-    rating = models.IntegerField(default=0,
-        verbose_name='Рейтинг',)
+    rating = models.IntegerField(
+        default=0, verbose_name='Рейтинг',)
     description = models.TextField(
         verbose_name='Описание',)
     genre = models.ManyToManyField(
@@ -58,10 +58,12 @@ class Title(models.Model):
 
 
 class TitleGenre(models.Model):
-    title = models.ForeignKey(Title,
+    title = models.ForeignKey(
+        Title,
         on_delete=models.CASCADE,
         verbose_name='Название',)
-    genre = models.ForeignKey(Genre,
+    genre = models.ForeignKey(
+        Genre,
         on_delete=models.SET_NULL,
         verbose_name='Жанр',)
 
