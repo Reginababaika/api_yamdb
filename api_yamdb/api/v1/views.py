@@ -5,7 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from rest_framework.response import Response
-from rest_framework import status, viewsets, generics
+from rest_framework import status, viewsets, mixins
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework import permissions, filters
@@ -22,43 +22,32 @@ from .serializers import (CommentSerializer, ReviewSerializer,
 from .filters import TitlesFilter
 
 
-class GenreList(generics.ListCreateAPIView):
+class CDLViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
 
+
+class GenreViewSet(CDLViewSet):
+    permission_classes = [IsAdminOrReadOnly, ]
+    lookup_field = 'slug'
     queryset = Genre.objects.all()
-    lookup_field = 'slug'
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['=name', ]
     pagination_class = LimitOffsetPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
 
 
-class GenreDetail(generics.DestroyAPIView):
-
-    queryset = Genre.objects.all()
+class CategoryViewSet(CDLViewSet):
+    permission_classes = [IsAdminOrReadOnly, ]
     lookup_field = 'slug'
-    serializer_class = GenreSerializer
-    pagination_class = LimitOffsetPagination
-    permission_classes = (IsAdminOrReadOnly,)
-
-
-class CategoryList(generics.ListCreateAPIView):
-
     queryset = Category.objects.all()
-    lookup_field = 'slug'
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    pagination_class = LimitOffsetPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-
-
-class CategoryDetail(generics.DestroyAPIView):
-    queryset = Category.objects.all()
-    lookup_field = 'slug'
-    serializer_class = CategorySerializer
-    pagination_class = LimitOffsetPagination
-    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['=name', ]
 
 
 class TitleViewSet(viewsets.ModelViewSet):

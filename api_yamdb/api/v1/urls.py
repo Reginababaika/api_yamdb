@@ -2,12 +2,14 @@ from django.urls import include, path
 from rest_framework import routers
 from .views import (get_token, signup, UserViewSet,
                     TitleViewSet, ReviewViewSet)
-from .views import (CommentViewSet, CategoryList,
-                    CategoryDetail, GenreList, GenreDetail)
+from .views import (CommentViewSet, CategoryViewSet,
+                    GenreViewSet)
 
 router = routers.DefaultRouter()
 router.register('users', UserViewSet)
 router.register('titles', TitleViewSet, basename='titles')
+router.register('categories', CategoryViewSet, basename='categories')
+router.register('genres', GenreViewSet, basename='genres')
 router.register(
     r'^titles/(?P<title_id>\d+)/reviews',
     ReviewViewSet,
@@ -21,8 +23,4 @@ urlpatterns = [
     path('', include(router.urls)),
     path('auth/signup/', signup, name='signup'),
     path('auth/token/', get_token, name='get_token'),
-    path('categories/', CategoryList.as_view()),
-    path('categories/<slug:slug>/', CategoryDetail.as_view()),
-    path('genres/', GenreList.as_view()),
-    path('genres/<slug:slug>/', GenreDetail.as_view()),
 ]
